@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut } from "next-auth/react";
-import { LogOut } from "lucide-react";
+import { LogOut, ExternalLink } from "lucide-react";
 
 export default function AdminHeader({ userName }: { userName: string }) {
   return (
@@ -11,9 +11,18 @@ export default function AdminHeader({ userName }: { userName: string }) {
       </h1>
 
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">{userName}</span>
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-[#ab815a] hover:bg-[#ab815a]/10 rounded-lg transition font-medium"
+        >
+          <ExternalLink className="w-4 h-4" />
+          <span className="hidden sm:inline">View Website</span>
+        </a>
+        <span className="text-sm text-gray-600 hidden sm:inline">{userName}</span>
         <button
-          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          onClick={() => signOut({ callbackUrl: "/admin-login" })}
           className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
         >
           <LogOut className="w-4 h-4" />

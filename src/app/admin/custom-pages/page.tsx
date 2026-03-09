@@ -57,7 +57,25 @@ export default function AdminCustomPagesPage() {
   const [success, setSuccess] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [slugManuallyEdited, setSlugManuallyEdited] = useState(false);
+
+  const generateSlug = (title: string) =>
+    title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  const handleTitleChange = (title: string) => {
+    setForm((prev) => ({
+      ...prev,
+      title,
+      slug: slugManuallyEdited ? prev.slug : generateSlug(title),
+    }));
+  };
+
+  const handleSlugChange = (slug: string) => {
+    setSlugManuallyEdited(true);
+    setForm((prev) => ({ ...prev, slug }));
+  };
 
   const fetchPages = async () => {
     try {
@@ -139,6 +157,7 @@ export default function AdminCustomPagesPage() {
       published: page.published,
       parentSlug: page.parentSlug || "",
     });
+    setSlugManuallyEdited(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -156,7 +175,9 @@ export default function AdminCustomPagesPage() {
   const resetForm = () => {
     setEditingId(null);
     setShowForm(false);
+    setShowPreview(false);
     setForm(emptyForm);
+    setSlugManuallyEdited(false);
   };
 
   const copyLink = (slug: string) => {
@@ -222,7 +243,7 @@ export default function AdminCustomPagesPage() {
                 <input
                   type="text"
                   value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  onChange={(e) => handleTitleChange(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none"
                   placeholder="e.g. Youth Camp 2026"
                 />
@@ -236,7 +257,7 @@ export default function AdminCustomPagesPage() {
                   <input
                     type="text"
                     value={form.slug}
-                    onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                    onChange={(e) => handleSlugChange(e.target.value)}
                     className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none"
                     placeholder="auto-generated-from-title"
                   />
@@ -324,12 +345,72 @@ export default function AdminCustomPagesPage() {
               {saving ? "Saving..." : editingId ? "Update Page" : "Create Page"}
             </button>
             <button
+              onClick={() => setShowPreview(!showPreview)}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-[#ab815a] text-[#ab815a] hover:bg-[#ab815a]/5 transition-colors"
+            >
+              <Eye className="w-4 h-4" />
+              {showPreview ? "Hide Preview" : "Preview"}
+            </button>
+            <button
               onClick={resetForm}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors"
             >
               <X className="w-4 h-4" />
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* ======================== PREVIEW ======================== */}
+      {showPreview && showForm && (
+        <div className="bg-white rounded-xl border-2 border-[#ab815a]/30 overflow-hidden mb-6">
+          <div className="bg-[#ab815a]/10 px-6 py-3 flex items-center justify-between border-b border-[#ab815a]/20">
+            <span className="text-sm font-medium text-[#ab815a]">Page Preview</span>
+            <div className="flex items-center gap-2">
+              {!form.published && (
+                <button
+                  onClick={() => {
+                    setForm({ ...form, published: true });
+                  }}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded text-xs font-medium bg-[#ab815a] text-white hover:bg-[#8a6744] transition-colors"
+                >
+                  Publish Now
+                </button>
+              )}
+              <span className="text-xs text-gray-500">/p/{form.slug || "..."}</span>
+            </div>
+          </div>
+
+          {/* Hero preview */}
+          <div className="relative bg-[#1e232b] py-16 text-center">
+            {form.heroImage && (
+              <div className="absolute inset-0 opacity-25">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={form.heroImage} alt="" className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="relative z-10 px-6">
+              <h1 className="font-[family-name:var(--font-gilda)] text-3xl text-white mb-2">
+                {form.title || "Page Title"}
+              </h1>
+              {form.excerpt && (
+                <p className="text-white/60 text-sm max-w-xl mx-auto">{form.excerpt}</p>
+              )}
+              <div className="w-12 h-[2px] bg-[#ab815a] mx-auto mt-4" />
+            </div>
+          </div>
+
+          {/* Content preview */}
+          <div className="px-8 py-10 bg-[#faf8f5]">
+            <article
+              className="prose prose-sm max-w-none text-[#1e232b]/80
+                prose-headings:font-[family-name:var(--font-gilda)] prose-headings:text-[#1e232b]
+                prose-a:text-[#ab815a] prose-a:underline
+                prose-img:rounded-xl prose-img:shadow-md
+                prose-blockquote:border-l-[#ab815a]"
+              dangerouslySetInnerHTML={{ __html: form.content || "<p class='text-gray-400 italic'>Start writing to see preview...</p>" }}
+            />
           </div>
         </div>
       )}

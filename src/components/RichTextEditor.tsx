@@ -1,9 +1,10 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Image from "@tiptap/extension-image";
-import Link from "@tiptap/extension-link";
+import TiptapImage from "@tiptap/extension-image";
+import TiptapLink from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import Underline from "@tiptap/extension-underline";
@@ -20,12 +21,14 @@ import {
   Quote,
   Minus,
   Link as LinkIcon,
+  Upload,
   Image as ImageIcon,
   AlignLeft,
   AlignCenter,
   AlignRight,
   Undo,
   Redo,
+  Loader2,
 } from "lucide-react";
 
 interface RichTextEditorProps {
@@ -39,16 +42,19 @@ export default function RichTextEditor({
   onChange,
   placeholder = "Start writing...",
 }: RichTextEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
       }),
       Underline,
-      Image.configure({
+      TiptapImage.configure({
         HTMLAttributes: { class: "rounded-lg max-w-full h-auto my-4" },
       }),
-      Link.configure({
+      TiptapLink.configure({
         openOnClick: false,
         HTMLAttributes: { class: "text-[#ab815a] underline" },
       }),
@@ -56,8 +62,8 @@ export default function RichTextEditor({
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
+    onUpdate: ({ editor: e }) => {
+      onChange(e.getHTML());
     },
     editorProps: {
       attributes: {
@@ -69,7 +75,38 @@ export default function RichTextEditor({
 
   if (!editor) return null;
 
-  const addImage = () => {
+  const uploadImage = async (file: File) => {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        editor.chain().focus().setImage({ src: data.url }).run();
+      } else {
+        alert(data.error || "Upload failed");
+      }
+    } catch {
+      alert("Upload failed. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadImage(file);
+      e.target.value = ""; // reset so same file can be selected again
+    }
+  };
+
+  const addImageByUrl = () => {
     const url = window.prompt("Enter image URL:");
     if (url) {
       editor.chain().focus().setImage({ src: url }).run();
@@ -86,19 +123,22 @@ export default function RichTextEditor({
   const ToolbarButton = ({
     onClick,
     active,
+    disabled,
     children,
     title,
   }: {
     onClick: () => void;
     active?: boolean;
+    disabled?: boolean;
     children: React.ReactNode;
     title: string;
   }) => (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       title={title}
-      className={`p-1.5 rounded transition-colors ${
+      className={`p-1.5 rounded transition-colors disabled:opacity-50 ${
         active
           ? "bg-[#ab815a] text-white"
           : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
@@ -108,10 +148,19 @@ export default function RichTextEditor({
     </button>
   );
 
-  const s = 16; // icon size
+  const s = 16;
 
   return (
     <div className="border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-[#ab815a] focus-within:border-transparent">
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b border-gray-200 bg-gray-50">
         <ToolbarButton
@@ -226,7 +275,10 @@ export default function RichTextEditor({
         <ToolbarButton onClick={addLink} active={editor.isActive("link")} title="Add Link">
           <LinkIcon size={s} />
         </ToolbarButton>
-        <ToolbarButton onClick={addImage} title="Add Image">
+        <ToolbarButton onClick={handleImageClick} disabled={uploading} title="Upload Image">
+          {uploading ? <Loader2 size={s} className="animate-spin" /> : <Upload size={s} />}
+        </ToolbarButton>
+        <ToolbarButton onClick={addImageByUrl} title="Image from URL">
           <ImageIcon size={s} />
         </ToolbarButton>
 
@@ -239,6 +291,14 @@ export default function RichTextEditor({
           <Redo size={s} />
         </ToolbarButton>
       </div>
+
+      {/* Upload indicator */}
+      {uploading && (
+        <div className="px-4 py-2 bg-amber-50 text-amber-700 text-xs flex items-center gap-2 border-b border-amber-200">
+          <Loader2 size={12} className="animate-spin" />
+          Uploading image...
+        </div>
+      )}
 
       {/* Editor */}
       <EditorContent editor={editor} />
