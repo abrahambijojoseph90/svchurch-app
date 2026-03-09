@@ -16,11 +16,13 @@ import {
   Menu,
   X,
   Globe,
+  FilePlus,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
   { label: "Pages", href: "/admin/pages", icon: Globe },
+  { label: "Custom Pages", href: "/admin/custom-pages", icon: FilePlus },
   { label: "Blog Posts", href: "/admin/blogs", icon: FileText },
   { label: "Leadership", href: "/admin/leadership", icon: Users },
   { label: "Ministries", href: "/admin/ministries", icon: Heart },

@@ -161,6 +161,24 @@ model PageContent {
   @@index([pageSlug])
 }
 
+model CustomPage {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String    // Main page content (paragraphs)
+  excerpt     String?   // Short description for link previews
+  heroImage   String?   // Banner/hero image URL
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  parentSlug  String?   // For nesting under a section (e.g., "about", "ministries")
+  order       Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([slug])
+  @@index([published, parentSlug])
+}
+
 model SermonMedia {
   id          String   @id @default(cuid())
   title       String
