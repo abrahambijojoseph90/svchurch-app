@@ -1,13 +1,10 @@
 import { NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import { requirePermission, logAuditEvent } from "@/lib/api-auth";
 
 export async function GET() {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const auth = await requirePermission("view_messages");
+  if (auth instanceof NextResponse) return auth;
 
   const messages = await prisma.contactSubmission.findMany({
     orderBy: { createdAt: "desc" },
@@ -17,22 +14,34 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const auth = await requirePermission("view_messages");
+  if (auth instanceof NextResponse) return auth;
+
+  let body: Record<string, unknown>;
+  try {
+    body = await request.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const body = await request.json();
-  const { id } = body;
+  const { id } = body as { id?: string };
 
-  if (!id) {
+  if (!id || typeof id !== "string") {
     return NextResponse.json({ error: "ID is required" }, { status: 400 });
+  }
+
+  // Verify record exists
+  const existing = await prisma.contactSubmission.findUnique({ where: { id } });
+  if (!existing) {
+    return NextResponse.json({ error: "Message not found" }, { status: 404 });
   }
 
   const message = await prisma.contactSubmission.update({
     where: { id },
     data: { read: true },
   });
+
+  await logAuditEvent(auth.user.id, "READ_MESSAGE", `ContactSubmission:${id}`);
 
   return NextResponse.json(message);
 }

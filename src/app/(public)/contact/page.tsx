@@ -365,11 +365,11 @@ export default function ContactPage() {
               width="100%"
               height="450"
               style={{ border: 0 }}
+              className="w-full h-[300px] sm:h-[450px]"
               allowFullScreen
               loading="lazy"
               referrerPolicy="no-referrer-when-downgrade"
               title="Spring Valley Church location - 49 High Town Rd, Luton LU2 0BW"
-              className="w-full"
             />
           </motion.div>
 

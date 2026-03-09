@@ -27,9 +27,9 @@ export default async function AdminLayout({
         <AdminSidebar />
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col ml-64">
+        <div className="flex-1 flex flex-col lg:ml-64">
           <AdminHeader userName={session.user?.name || "Admin"} />
-          <main className="flex-1 p-6">{children}</main>
+          <main className="flex-1 p-4 sm:p-6">{children}</main>
         </div>
       </div>
     </AdminSessionProvider>
