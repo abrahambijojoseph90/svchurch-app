@@ -3,25 +3,76 @@
 @tailwind utilities;
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --color-primary: #ab815a;
+  --color-accent: #f16923;
+  --color-dark: #1e232b;
+  --color-cream: #faf8f5;
+  --color-warm-gray: #f5f0eb;
+
+  --color-primary-light: #c9a882;
+  --color-primary-dark: #8a6744;
+  --color-accent-light: #f4894f;
+  --color-accent-dark: #d4561a;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Force light/warm appearance — no dark mode */
+html {
+  color-scheme: light;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Inter", sans-serif;
+  color: var(--color-dark);
+  background-color: var(--color-cream);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+/* Custom scrollbar — thin, bronze-colored */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-warm-gray);
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: var(--color-warm-gray);
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--color-primary);
+  border-radius: 9999px;
+  border: 2px solid var(--color-warm-gray);
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-primary-dark);
+}
+
+/* Selection highlight */
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-cream);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Gilda Display", serif;
+    color: var(--color-dark);
   }
 }
+

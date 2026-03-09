@@ -1,0 +1,25 @@
+"use client";
+
+import { signOut } from "next-auth/react";
+import { LogOut } from "lucide-react";
+
+export default function AdminHeader({ userName }: { userName: string }) {
+  return (
+    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-6 sticky top-0 z-20">
+      <h1 className="text-lg font-semibold text-gray-900">
+        Spring Valley Admin
+      </h1>
+
+      <div className="flex items-center gap-4">
+        <span className="text-sm text-gray-600">{userName}</span>
+        <button
+          onClick={() => signOut({ callbackUrl: "/admin/login" })}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
+      </div>
+    </header>
+  );
+}

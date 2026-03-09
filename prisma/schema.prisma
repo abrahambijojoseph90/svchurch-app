@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Authentication & RBAC ──────────────────────────────────────────
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  EDITOR
+  CREATOR
+  VIEWER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(VIEWER)
+  active        Boolean   @default(true)
+  lastLogin     DateTime?
+  loginAttempts Int       @default(0)
+  lockedUntil   DateTime?
+  invitedBy     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  blogPosts     BlogPost[]    @relation("AuthorPosts")
+  auditLogs     AuditLog[]
+  uploads       GalleryImage[] @relation("UploadedBy")
+}
+
+model Invitation {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      Role
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  invitedBy String
+  createdAt DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  action    String   // e.g., "CREATE_POST", "DELETE_GALLERY", "LOGIN"
+  target    String?  // e.g., "BlogPost:cuid123"
+  details   Json?
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+// ─── Content Models ─────────────────────────────────────────────────
+
+model Leader {
+  id        String   @id @default(cuid())
+  name      String
+  role      String
+  bio       String?
+  image     String?
+  order     Int      @default(0)
+  socials   Json?    // { facebook?: string, instagram?: string, youtube?: string }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Ministry {
+  id          String   @id @default(cuid())
+  name        String
+  subtitle    String?
+  description String
+  schedule    String?
+  location    String?
+  image       String?
+  icon        String?  // lucide-react icon name
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model BlogPost {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String
+  excerpt     String?
+  authorId    String
+  author      User      @relation("AuthorPosts", fields: [authorId], references: [id])
+  image       String?
+  published   Boolean   @default(false)
+  publishedAt DateTime?
+  // Social media cross-posting tracking
+  postedToFacebook  Boolean  @default(false)
+  postedToInstagram Boolean  @default(false)
+  postedToYouTube   Boolean  @default(false)
+  postedToWhatsApp  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([slug])
+  @@index([published, publishedAt])
+}
+
+model GalleryImage {
+  id          String   @id @default(cuid())
+  src         String
+  caption     String?
+  order       Int      @default(0)
+  uploadedById String?
+  uploadedBy  User?    @relation("UploadedBy", fields: [uploadedById], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([order])
+}
+
+model ContactSubmission {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  phone     String?
+  message   String
+  read      Boolean  @default(false)
+  repliedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([read, createdAt])
+}
+
+model SiteSettings {
+  id    String @id @default(cuid())
+  key   String @unique
+  value String
+}
+
+model SermonMedia {
+  id          String   @id @default(cuid())
+  title       String
+  speaker     String?
+  date        DateTime
+  type        String   @default("video") // "video" | "audio"
+  url         String
+  thumbnail   String?
+  description String?
+  youtubeId   String?  // YouTube video ID if published there
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published, date])
+}
+
+// ─── Social Media Integration ───────────────────────────────────────
+
+model SocialAccount {
+  id           String   @id @default(cuid())
+  platform     String   // "facebook" | "instagram" | "youtube" | "whatsapp"
+  accountName  String
+  accountId    String   // Platform-specific account/page ID
+  accessToken  String   // Encrypted with AES-256
+  refreshToken String?  // Encrypted
+  tokenExpiry  DateTime?
+  isActive     Boolean  @default(true)
+  metadata     Json?    // Platform-specific data
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([platform, accountId])
+}
+
+model SocialPost {
+  id          String   @id @default(cuid())
+  platform    String   // "facebook" | "instagram" | "youtube" | "whatsapp"
+  postId      String?  // Platform-specific post ID
+  content     String
+  mediaUrl    String?
+  status      String   @default("pending") // "pending" | "posted" | "failed" | "scheduled"
+  scheduledAt DateTime?
+  postedAt    DateTime?
+  error       String?
+  blogPostId  String?  // Link to blog post if cross-posted
+  createdAt   DateTime @default(now())
+
+  @@index([platform, status])
+  @@index([blogPostId])
+}
+
+// ─── WhatsApp Messaging ─────────────────────────────────────────────
+
+model WhatsAppBroadcast {
+  id          String   @id @default(cuid())
+  templateName String?  // WhatsApp-approved template name
+  message     String
+  mediaUrl    String?
+  audience    String   @default("all") // "all" | "ministry_name" | custom group
+  status      String   @default("draft") // "draft" | "sent" | "failed"
+  sentAt      DateTime?
+  sentBy      String?
+  recipientCount Int   @default(0)
+  deliveredCount Int   @default(0)
+  readCount     Int    @default(0)
+  createdAt   DateTime @default(now())
+}
