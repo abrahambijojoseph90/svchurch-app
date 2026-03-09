@@ -15,10 +15,12 @@ import {
   Settings,
   Menu,
   X,
+  Globe,
 } from "lucide-react";
 
 const navItems = [
   { label: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { label: "Pages", href: "/admin/pages", icon: Globe },
   { label: "Blog Posts", href: "/admin/blogs", icon: FileText },
   { label: "Leadership", href: "/admin/leadership", icon: Users },
   { label: "Ministries", href: "/admin/ministries", icon: Heart },

@@ -149,6 +149,18 @@ model SiteSettings {
   value String
 }
 
+model PageContent {
+  id        String   @id @default(cuid())
+  pageSlug  String   // e.g., "home", "about"
+  section   String   // e.g., "hero_title", "welcome_text"
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([pageSlug, section])
+  @@index([pageSlug])
+}
+
 model SermonMedia {
   id          String   @id @default(cuid())
   title       String
