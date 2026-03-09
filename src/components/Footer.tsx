@@ -84,9 +84,16 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="relative border-t border-white/10">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-white/50 text-sm">
-            &copy; 2026 Spring Valley Church. All rights reserved.
-          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-white/50 text-sm">
+            <p>&copy; 2026 Spring Valley Church. All rights reserved.</p>
+            <span className="hidden sm:inline">&middot;</span>
+            <Link
+              href="/privacy-policy"
+              className="hover:text-[#ab815a] transition-colors"
+            >
+              Privacy Policy
+            </Link>
+          </div>
 
           {/* Social Icons */}
           <div className="flex items-center gap-4">

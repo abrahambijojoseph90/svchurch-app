@@ -25,14 +25,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { name, subtitle, description, schedule, location, image, icon, order } =
+  const { name, slug, subtitle, description, fullContent, mission, schedule, location, image, bannerImage, icon, order } =
     body as {
       name?: string;
+      slug?: string;
       subtitle?: string;
       description?: string;
+      fullContent?: string;
+      mission?: string;
       schedule?: string;
       location?: string;
       image?: string;
+      bannerImage?: string;
       icon?: string;
       order?: number;
     };
@@ -44,14 +48,20 @@ export async function POST(request: Request) {
     );
   }
 
+  const finalSlug = slug || name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
   const ministry = await prisma.ministry.create({
     data: {
       name: sanitizeHtml(name),
+      slug: finalSlug,
       subtitle: subtitle ? sanitizeHtml(subtitle) : null,
       description: sanitizeHtml(description),
+      fullContent: fullContent || null,
+      mission: mission ? sanitizeHtml(mission) : null,
       schedule: schedule ? sanitizeHtml(schedule) : null,
       location: location ? sanitizeHtml(location) : null,
       image: image || null,
+      bannerImage: bannerImage || null,
       icon: icon ? sanitizeHtml(icon) : null,
       order: typeof order === "number" ? order : 0,
     },
@@ -73,15 +83,19 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { id, name, subtitle, description, schedule, location, image, icon, order } =
+  const { id, name, slug, subtitle, description, fullContent, mission, schedule, location, image, bannerImage, icon, order } =
     body as {
       id?: string;
       name?: string;
+      slug?: string;
       subtitle?: string;
       description?: string;
+      fullContent?: string;
+      mission?: string;
       schedule?: string;
       location?: string;
       image?: string;
+      bannerImage?: string;
       icon?: string;
       order?: number;
     };
@@ -99,11 +113,15 @@ export async function PUT(request: Request) {
     where: { id },
     data: {
       name: name ? sanitizeHtml(name) : undefined,
+      slug: slug || undefined,
       subtitle: subtitle ? sanitizeHtml(subtitle) : null,
       description: description ? sanitizeHtml(description) : undefined,
+      fullContent: fullContent !== undefined ? fullContent || null : undefined,
+      mission: mission !== undefined ? (mission ? sanitizeHtml(mission) : null) : undefined,
       schedule: schedule ? sanitizeHtml(schedule) : null,
       location: location ? sanitizeHtml(location) : null,
       image: image || null,
+      bannerImage: bannerImage !== undefined ? bannerImage || null : undefined,
       icon: icon ? sanitizeHtml(icon) : null,
       order: typeof order === "number" ? order : 0,
     },

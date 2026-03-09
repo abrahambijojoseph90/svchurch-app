@@ -14,11 +14,15 @@ import {
 interface Ministry {
   id: string;
   name: string;
+  slug: string;
   subtitle: string | null;
   description: string;
+  fullContent: string | null;
+  mission: string | null;
   schedule: string | null;
   location: string | null;
   image: string | null;
+  bannerImage: string | null;
   icon: string | null;
   order: number;
 }
@@ -33,11 +37,15 @@ export default function AdminMinistriesPage() {
 
   const emptyForm = {
     name: "",
+    slug: "",
     subtitle: "",
     description: "",
+    fullContent: "",
+    mission: "",
     schedule: "",
     location: "",
     image: "",
+    bannerImage: "",
     icon: "",
   };
   const [form, setForm] = useState(emptyForm);
@@ -70,14 +78,19 @@ export default function AdminMinistriesPage() {
 
     try {
       const method = editingId ? "PUT" : "POST";
+      const slug = form.slug || form.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
       const body = {
         ...(editingId ? { id: editingId } : {}),
         name: form.name,
+        slug,
         subtitle: form.subtitle || null,
         description: form.description,
+        fullContent: form.fullContent || null,
+        mission: form.mission || null,
         schedule: form.schedule || null,
         location: form.location || null,
         image: form.image || null,
+        bannerImage: form.bannerImage || null,
         icon: form.icon || null,
         order: editingId
           ? ministries.find((m) => m.id === editingId)?.order ?? 0
@@ -109,11 +122,15 @@ export default function AdminMinistriesPage() {
     setShowForm(true);
     setForm({
       name: ministry.name,
+      slug: ministry.slug || "",
       subtitle: ministry.subtitle || "",
       description: ministry.description,
+      fullContent: ministry.fullContent || "",
+      mission: ministry.mission || "",
       schedule: ministry.schedule || "",
       location: ministry.location || "",
       image: ministry.image || "",
+      bannerImage: ministry.bannerImage || "",
       icon: ministry.icon || "",
     });
   };
@@ -194,16 +211,48 @@ export default function AdminMinistriesPage() {
                   placeholder="Short subtitle"
                 />
               </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Slug</label>
+                <input
+                  type="text"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none"
+                  placeholder="Auto-generated from name if empty"
+                />
+              </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description <span className="text-red-500">*</span>
+                  Short Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  rows={4}
+                  rows={3}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none resize-y"
-                  placeholder="Ministry description"
+                  placeholder="Brief description shown on the ministries listing page"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mission Statement</label>
+                <textarea
+                  value={form.mission}
+                  onChange={(e) => setForm({ ...form, mission: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none resize-y"
+                  placeholder="Ministry mission statement (shown on detail page)"
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Full Page Content
+                </label>
+                <textarea
+                  value={form.fullContent}
+                  onChange={(e) => setForm({ ...form, fullContent: e.target.value })}
+                  rows={8}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none resize-y"
+                  placeholder="Detailed content for the individual ministry page. Use separate lines for paragraphs."
                 />
               </div>
               <div>
@@ -227,13 +276,23 @@ export default function AdminMinistriesPage() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Card Image URL</label>
                 <input
-                  type="url"
+                  type="text"
                   value={form.image}
                   onChange={(e) => setForm({ ...form, image: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="/images/ministries/example.jpg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Banner Image URL</label>
+                <input
+                  type="text"
+                  value={form.bannerImage}
+                  onChange={(e) => setForm({ ...form, bannerImage: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#ab815a] focus:border-transparent outline-none"
+                  placeholder="Hero image for the detail page"
                 />
               </div>
               <div>

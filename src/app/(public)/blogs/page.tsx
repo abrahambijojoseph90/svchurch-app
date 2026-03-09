@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /* ------------------------------------------------------------------ */
 /*  Animation helpers                                                  */
@@ -33,14 +34,14 @@ const cardVariant = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Data                                                               */
+/*  Fallback data (used if DB is empty or fetch fails)                 */
 /* ------------------------------------------------------------------ */
 
-const blogPosts = [
+const fallbackPosts = [
   {
     title: "To the Stranger and the Friend",
-    date: "July 1, 2025",
-    author: "Rebecca Mathew",
+    publishedAt: "2025-07-01",
+    authorName: "Rebecca Mathew",
     image: "/images/church3-home-pic1.jpg",
     excerpt:
       "A reflection on hospitality, belonging, and the transformative power of welcoming others into our lives and into the family of God.",
@@ -48,8 +49,8 @@ const blogPosts = [
   },
   {
     title: "Mary Magdalene After the Resurrection",
-    date: "June 15, 2025",
-    author: "Spring Valley Church",
+    publishedAt: "2025-06-15",
+    authorName: "Spring Valley Church",
     image: "/images/church3-home-pic4.jpg",
     excerpt:
       "Exploring the profound encounter at the empty tomb and what Mary Magdalene\u2019s faith journey teaches us about devotion and hope.",
@@ -57,8 +58,8 @@ const blogPosts = [
   },
   {
     title: "Factors That Help Us to Know God",
-    date: "June 1, 2025",
-    author: "Spring Valley Church",
+    publishedAt: "2025-06-01",
+    authorName: "Spring Valley Church",
     image: "/images/church3-home-pic5.jpg",
     excerpt:
       "What draws us closer to the Creator? We explore the practices, postures, and relationships that open our hearts to knowing God more deeply.",
@@ -67,10 +68,36 @@ const blogPosts = [
 ];
 
 /* ------------------------------------------------------------------ */
+/*  Types                                                              */
+/* ------------------------------------------------------------------ */
+
+interface BlogPost {
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  image: string | null;
+  publishedAt: string | null;
+  authorName: string;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Page Component                                                     */
 /* ------------------------------------------------------------------ */
 
 export default function BlogsPage() {
+  const [posts, setPosts] = useState<BlogPost[]>(fallbackPosts);
+
+  useEffect(() => {
+    fetch("/api/blogs")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length > 0) setPosts(data);
+      })
+      .catch(() => {
+        // Use fallback data
+      });
+  }, []);
+
   return (
     <main className="overflow-x-hidden">
       {/* ======================== HERO ======================== */}
@@ -117,7 +144,7 @@ export default function BlogsPage() {
             viewport={{ once: true, margin: "-60px" }}
             variants={staggerContainer}
           >
-            {blogPosts.map((post) => (
+            {posts.map((post) => (
               <motion.article
                 key={post.slug}
                 variants={cardVariant}
@@ -128,21 +155,27 @@ export default function BlogsPage() {
                 {/* Image */}
                 <div className="relative aspect-[16/10] overflow-hidden">
                   <Image
-                    src={post.image}
+                    src={post.image || "/images/church3-home-pic1.jpg"}
                     alt={post.title}
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   {/* Date badge */}
                   <div className="absolute top-4 left-4 bg-[#1e232b]/80 backdrop-blur-sm text-white text-xs font-medium px-3 py-1.5 rounded-full">
-                    {post.date}
+                    {post.publishedAt
+                      ? new Date(post.publishedAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })
+                      : "Draft"}
                   </div>
                 </div>
 
                 {/* Content */}
                 <div className="p-6 lg:p-8">
                   <p className="font-[family-name:var(--font-cinzel)] text-[#ab815a] text-xs tracking-[0.15em] uppercase mb-3">
-                    {post.author}
+                    {post.authorName}
                   </p>
 
                   <h2 className="font-[family-name:var(--font-gilda)] text-xl sm:text-2xl text-[#1e232b] leading-snug mb-3 group-hover:text-[#ab815a] transition-colors duration-300">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -46,10 +47,28 @@ const cardFade = {
 /*  Data                                                               */
 /* ------------------------------------------------------------------ */
 
-const ministries = [
+/* ------------------------------------------------------------------ */
+/*  Icon map                                                           */
+/* ------------------------------------------------------------------ */
+
+const iconMap: Record<string, typeof Baby> = {
+  Baby,
+  HandHeart,
+  GraduationCap,
+  Heart,
+  Shield,
+  Globe,
+};
+
+/* ------------------------------------------------------------------ */
+/*  Fallback data                                                      */
+/* ------------------------------------------------------------------ */
+
+const fallbackMinistries = [
   {
-    icon: Baby,
+    icon: "Baby",
     name: "Kid\u2019s Club",
+    slug: "kids-club",
     subtitle: "For children under 12",
     description:
       "Teaching the word of God with games and engaging activities that help children discover faith in a fun, nurturing environment.",
@@ -58,8 +77,9 @@ const ministries = [
     image: "/images/ministries/church3-ministry-pic1.jpg",
   },
   {
-    icon: HandHeart,
+    icon: "HandHeart",
     name: "Prayer Meetings",
+    slug: "prayer-meetings",
     subtitle: "Prayer and Spiritual Encounters",
     description:
       "Monthly gatherings for prayer and worship \u2014 lifting up our families, community, and the nations in heartfelt intercession.",
@@ -68,8 +88,9 @@ const ministries = [
     image: "/images/ministries/church3-ministry-pic2.jpg",
   },
   {
-    icon: GraduationCap,
+    icon: "GraduationCap",
     name: "SVC Students and Twentees",
+    slug: "svc-students-and-twentees",
     subtitle: "For ages 15\u201330",
     description:
       "Navigating faith, identity and purpose through discussions and fellowship \u2014 a dynamic space for young people to explore and grow.",
@@ -78,8 +99,9 @@ const ministries = [
     image: "/images/ministries/church3-ministry-pic3.jpg",
   },
   {
-    icon: Heart,
+    icon: "Heart",
     name: "SVC Women\u2019s Fellowship",
+    slug: "svc-womens-fellowship",
     subtitle: "In partnership with sisters",
     description:
       "Bible study, worship, encouragement, mentorship and outreach \u2014 empowering women to grow together in faith and community.",
@@ -88,8 +110,9 @@ const ministries = [
     image: "/images/ministries/church3-ministry-pic4.jpg",
   },
   {
-    icon: Shield,
+    icon: "Shield",
     name: "SVC Men\u2019s Fellowship",
+    slug: "svc-mens-fellowship",
     subtitle: "For the men of the church",
     description:
       "Discussions, fellowship, outdoor gatherings and community work \u2014 building each other up as men of God.",
@@ -98,8 +121,9 @@ const ministries = [
     image: "/images/ministries/church3-ministry-pic5.jpg",
   },
   {
-    icon: Globe,
+    icon: "Globe",
     name: "SVC Missions",
+    slug: "svc-missions",
     subtitle: "The heartbeat of the church is the Great Commission",
     description:
       "Mission work is central to who we are. From local outreach to global partnerships, we go where God leads to share His love.",
@@ -114,6 +138,17 @@ const ministries = [
 /* ------------------------------------------------------------------ */
 
 export default function MinistriesPage() {
+  const [ministries, setMinistries] = useState(fallbackMinistries);
+
+  useEffect(() => {
+    fetch("/api/ministries")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.length > 0) setMinistries(data);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <main className="overflow-x-hidden">
       {/* ======================== HERO ======================== */}
@@ -180,7 +215,7 @@ export default function MinistriesPage() {
           <div className="flex flex-col gap-20 lg:gap-28">
             {ministries.map((ministry, index) => {
               const isEven = index % 2 === 0;
-              const IconComponent = ministry.icon;
+              const IconComponent = iconMap[ministry.icon || "Heart"] || Heart;
 
               return (
                 <motion.div
@@ -194,19 +229,20 @@ export default function MinistriesPage() {
                   }`}
                 >
                   {/* Image */}
-                  <div
-                    className={`relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl ${
+                  <Link
+                    href={`/about/ministries/${ministry.slug}`}
+                    className={`relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl block ${
                       !isEven ? "lg:order-2" : ""
                     }`}
                   >
                     <Image
-                      src={ministry.image}
+                      src={ministry.image || "/images/church3-home-pic1.jpg"}
                       alt={ministry.name}
                       fill
                       className="object-cover hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-[#1e232b]/30 to-transparent" />
-                  </div>
+                  </Link>
 
                   {/* Content */}
                   <div className={!isEven ? "lg:order-1" : ""}>
@@ -240,7 +276,13 @@ export default function MinistriesPage() {
                       </div>
                     )}
 
-                    <div className="mt-6 h-[2px] w-16 bg-[#ab815a]/30 rounded-full" />
+                    <Link
+                      href={`/about/ministries/${ministry.slug}`}
+                      className="inline-flex items-center gap-2 mt-6 text-[#ab815a] font-medium text-sm hover:text-[#f16923] transition-colors duration-300"
+                    >
+                      Learn More
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
                   </div>
                 </motion.div>
               );

@@ -78,15 +78,21 @@ model Leader {
 model Ministry {
   id          String   @id @default(cuid())
   name        String
+  slug        String   @unique @default("")
   subtitle    String?
   description String
+  fullContent String?  // Detailed page content (rich text)
+  mission     String?  // Ministry mission statement
   schedule    String?
   location    String?
   image       String?
+  bannerImage String?  // Hero image for detail page
   icon        String?  // lucide-react icon name
   order       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  @@index([slug])
 }
 
 model BlogPost {

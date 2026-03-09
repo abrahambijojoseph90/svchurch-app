@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Gilda_Display, Inter, Cinzel } from "next/font/google";
+import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
 const gildaDisplay = Gilda_Display({
@@ -52,6 +53,7 @@ export default function RootLayout({
         className={`${gildaDisplay.variable} ${inter.variable} ${cinzel.variable} font-sans antialiased`}
       >
         {children}
+        <CookieConsent />
       </body>
     </html>
   );
