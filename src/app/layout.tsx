@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Gilda_Display, Inter, Cinzel } from "next/font/google";
+import AdminSessionProvider from "@/components/AdminSessionProvider";
 import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
@@ -52,7 +53,9 @@ export default function RootLayout({
       <body
         className={`${gildaDisplay.variable} ${inter.variable} ${cinzel.variable} font-sans antialiased`}
       >
-        {children}
+        <AdminSessionProvider>
+          {children}
+        </AdminSessionProvider>
         <CookieConsent />
       </body>
     </html>

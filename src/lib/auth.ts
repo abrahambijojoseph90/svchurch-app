@@ -1,11 +1,16 @@
 import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import bcrypt from "bcryptjs";
 import prisma from "@/lib/prisma";
 import { checkLoginRateLimit } from "@/lib/security";
 
 export const authOptions: AuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -29,6 +34,11 @@ export const authOptions: AuthOptions = {
         });
 
         if (!user || !user.active) {
+          return null;
+        }
+
+        // OAuth-only users cannot log in with credentials
+        if (user.provider !== "credentials" || !user.password) {
           return null;
         }
 
@@ -74,6 +84,7 @@ export const authOptions: AuthOptions = {
           name: user.name,
           email: user.email,
           role: user.role,
+          image: user.avatar,
         };
       },
     }),
@@ -83,13 +94,79 @@ export const authOptions: AuthOptions = {
     maxAge: 60 * 60, // 1 hour
   },
   pages: {
-    signIn: "/admin-login",
+    signIn: "/sign-in",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const email = user.email;
+        if (!email) return false;
+
+        // Check if user exists by email or googleId
+        let existingUser = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (existingUser) {
+          // Link Google account if not already linked
+          if (!existingUser.googleId && account.providerAccountId) {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                googleId: account.providerAccountId,
+                avatar: user.image || existingUser.avatar,
+                provider: existingUser.provider === "credentials" ? "credentials" : "google",
+                lastLogin: new Date(),
+              },
+            });
+          } else {
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                lastLogin: new Date(),
+                avatar: user.image || existingUser.avatar,
+              },
+            });
+          }
+
+          if (!existingUser.active) return false;
+        } else {
+          // Create new user as CONTRIBUTOR
+          existingUser = await prisma.user.create({
+            data: {
+              name: user.name || "Church Member",
+              email,
+              googleId: account.providerAccountId,
+              avatar: user.image || null,
+              provider: "google",
+              role: "CONTRIBUTOR",
+              active: true,
+              lastLogin: new Date(),
+            },
+          });
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id;
-        token.role = (user as unknown as { role: string }).role;
+        // For credentials provider, user already has id and role
+        if (account?.provider === "credentials") {
+          token.id = user.id;
+          token.role = (user as unknown as { role: string }).role;
+          token.avatar = user.image;
+        } else if (account?.provider === "google") {
+          // For Google provider, look up the user in the DB
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email! },
+            select: { id: true, role: true, avatar: true },
+          });
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.role = dbUser.role;
+            token.avatar = dbUser.avatar;
+          }
+        }
       }
       return token;
     },
@@ -97,6 +174,7 @@ export const authOptions: AuthOptions = {
       if (session.user) {
         (session.user as { id: string }).id = token.id as string;
         (session.user as { role: string }).role = token.role as string;
+        (session.user as { avatar: string | null }).avatar = (token.avatar as string) || null;
       }
       return session;
     },

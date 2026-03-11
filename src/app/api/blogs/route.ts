@@ -4,9 +4,9 @@ import prisma from "@/lib/prisma";
 export async function GET() {
   try {
     const posts = await prisma.blogPost.findMany({
-      where: { published: true },
+      where: { published: true, status: "PUBLISHED" },
       orderBy: { publishedAt: "desc" },
-      include: { author: { select: { name: true } } },
+      include: { author: { select: { name: true, avatar: true } } },
     });
 
     const formatted = posts.map((post) => ({
@@ -16,6 +16,7 @@ export async function GET() {
       image: post.image,
       publishedAt: post.publishedAt?.toISOString() || null,
       authorName: post.author.name,
+      authorAvatar: post.author.avatar,
     }));
 
     return NextResponse.json(formatted);

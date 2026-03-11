@@ -2,6 +2,16 @@
 const nextConfig = {
   images: {
     unoptimized: process.env.NODE_ENV === "development",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.public.blob.vercel-storage.com",
+      },
+    ],
   },
   async headers() {
     return [
@@ -33,7 +43,7 @@ const nextConfig = {
               "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://www.google.com https://maps.google.com",
               "frame-ancestors 'none'",
               "base-uri 'self'",
-              "form-action 'self'",
+              "form-action 'self' https://accounts.google.com",
               "upgrade-insecure-requests",
             ].join("; "),
           },

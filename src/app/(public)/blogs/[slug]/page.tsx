@@ -11,7 +11,7 @@ export default async function BlogPostPage({
 }) {
   const post = await prisma.blogPost.findUnique({
     where: { slug: params.slug, published: true },
-    include: { author: { select: { name: true } } },
+    include: { author: { select: { name: true, avatar: true, bio: true } } },
   });
 
   if (!post) {
@@ -84,18 +84,36 @@ export default async function BlogPostPage({
             </div>
           )}
 
+          {/* Author card */}
+          <div className="flex items-center gap-4 mb-10 p-4 bg-gray-50 rounded-xl">
+            <div className="w-12 h-12 rounded-full overflow-hidden bg-[#ab815a]/10 flex items-center justify-center flex-shrink-0">
+              {post.author.avatar ? (
+                <Image
+                  src={post.author.avatar}
+                  alt={post.author.name}
+                  width={48}
+                  height={48}
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <span className="text-lg font-bold text-[#ab815a]">
+                  {post.author.name.charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+            <div>
+              <p className="font-medium text-[#1e232b]">{post.author.name}</p>
+              {post.author.bio && (
+                <p className="text-sm text-gray-500 line-clamp-1">{post.author.bio}</p>
+              )}
+            </div>
+          </div>
+
           {/* Article content */}
-          <article className="prose prose-lg max-w-none text-[#1e232b]/80 leading-relaxed">
-            {post.content.split("\n").map((paragraph, i) => {
-              const trimmed = paragraph.trim();
-              if (!trimmed) return null;
-              return (
-                <p key={i} className="mb-6">
-                  {trimmed}
-                </p>
-              );
-            })}
-          </article>
+          <article
+            className="prose prose-lg max-w-none text-[#1e232b]/80 leading-relaxed"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
 
           {/* Divider */}
           <div className="mt-16 pt-10 border-t border-[#ab815a]/20">

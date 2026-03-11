@@ -1,14 +1,15 @@
 /**
  * Role-Based Access Control (RBAC) for Spring Valley Church
  *
- * Roles: SUPER_ADMIN > ADMIN > EDITOR > CREATOR > VIEWER
+ * Roles: SUPER_ADMIN > ADMIN > EDITOR > CREATOR > CONTRIBUTOR > VIEWER
  */
 
-export type Role = "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "CREATOR" | "VIEWER";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "EDITOR" | "CREATOR" | "CONTRIBUTOR" | "VIEWER";
 
 // Role hierarchy — higher index = more permissions
 const ROLE_HIERARCHY: Role[] = [
   "VIEWER",
+  "CONTRIBUTOR",
   "CREATOR",
   "EDITOR",
   "ADMIN",
@@ -31,6 +32,7 @@ type Permission =
   | "edit_any_post"
   | "delete_any_post"
   | "edit_own_post"
+  | "review_posts"
   | "crosspost_social"
   | "manage_leadership"
   | "manage_ministries"
@@ -40,7 +42,9 @@ type Permission =
   | "manage_media"
   | "send_whatsapp"
   | "view_analytics"
-  | "view_audit_log";
+  | "view_audit_log"
+  | "create_own_posts"
+  | "submit_for_review";
 
 const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
   SUPER_ADMIN: [
@@ -52,6 +56,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "edit_any_post",
     "delete_any_post",
     "edit_own_post",
+    "review_posts",
     "crosspost_social",
     "manage_leadership",
     "manage_ministries",
@@ -62,6 +67,8 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "send_whatsapp",
     "view_analytics",
     "view_audit_log",
+    "create_own_posts",
+    "submit_for_review",
   ],
   ADMIN: [
     "manage_settings",
@@ -70,6 +77,7 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "edit_any_post",
     "delete_any_post",
     "edit_own_post",
+    "review_posts",
     "crosspost_social",
     "manage_leadership",
     "manage_ministries",
@@ -80,12 +88,15 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "send_whatsapp",
     "view_analytics",
     "view_audit_log",
+    "create_own_posts",
+    "submit_for_review",
   ],
   EDITOR: [
     "create_posts",
     "publish_posts",
     "edit_any_post",
     "edit_own_post",
+    "review_posts",
     "crosspost_social",
     "manage_ministries",
     "upload_gallery",
@@ -93,6 +104,8 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "view_messages",
     "manage_media",
     "view_analytics",
+    "create_own_posts",
+    "submit_for_review",
   ],
   CREATOR: [
     "create_posts",
@@ -100,6 +113,13 @@ const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
     "upload_gallery",
     "manage_media",
     "view_analytics",
+    "create_own_posts",
+    "submit_for_review",
+  ],
+  CONTRIBUTOR: [
+    "create_own_posts",
+    "edit_own_post",
+    "submit_for_review",
   ],
   VIEWER: ["view_messages", "view_analytics"],
 };
@@ -114,6 +134,7 @@ export function getRoleLabel(role: Role): string {
     ADMIN: "Admin",
     EDITOR: "Editor",
     CREATOR: "Creator",
+    CONTRIBUTOR: "Contributor",
     VIEWER: "Viewer",
   };
   return labels[role] || role;
@@ -125,6 +146,7 @@ export function getRoleColor(role: Role): string {
     ADMIN: "bg-purple-100 text-purple-800",
     EDITOR: "bg-blue-100 text-blue-800",
     CREATOR: "bg-green-100 text-green-800",
+    CONTRIBUTOR: "bg-teal-100 text-teal-800",
     VIEWER: "bg-gray-100 text-gray-800",
   };
   return colors[role] || "bg-gray-100 text-gray-800";

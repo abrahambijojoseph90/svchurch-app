@@ -69,6 +69,7 @@ export async function POST(request: Request) {
       image: image || null,
       published: published || false,
       publishedAt: published ? new Date() : null,
+      status: published ? "PUBLISHED" : "DRAFT",
     },
   });
 

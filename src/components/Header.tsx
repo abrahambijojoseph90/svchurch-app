@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, PenLine, User, LogOut, FileText } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface NavItem {
@@ -35,11 +36,14 @@ const navItems: NavItem[] = [
 ];
 
 export default function Header() {
+  const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [mobileDropdown, setMobileDropdown] = useState<string | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -61,6 +65,17 @@ export default function Header() {
     };
   }, [mobileMenuOpen]);
 
+  // Close user menu on outside click
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
   const handleMouseEnter = (label: string) => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setOpenDropdown(label);
@@ -75,6 +90,9 @@ export default function Header() {
   const toggleMobileDropdown = (label: string) => {
     setMobileDropdown((prev) => (prev === label ? null : label));
   };
+
+  const userAvatar = (session?.user as { avatar?: string })?.avatar;
+  const userName = session?.user?.name;
 
   return (
     <header
@@ -153,15 +171,110 @@ export default function Header() {
               </div>
             ))}
 
+            {/* Write Button (shown for signed-in users) */}
+            {session && (
+              <Link
+                href="/write"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white/90 hover:text-white transition-colors rounded-md hover:bg-white/10"
+              >
+                <PenLine size={15} />
+                Write
+              </Link>
+            )}
+
             {/* Give Button */}
             <a
               href="https://www.stewardship.org.uk/partners/SpringValleyChurchLuton"
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-4 inline-flex items-center rounded-md bg-[#ab815a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#96704d] transition-colors shadow-md"
+              className="ml-2 inline-flex items-center rounded-md bg-[#ab815a] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#96704d] transition-colors shadow-md"
             >
               Give
             </a>
+
+            {/* User Menu / Sign In */}
+            {session ? (
+              <div className="relative ml-2" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(!userMenuOpen)}
+                  className="flex items-center gap-2 px-2 py-1.5 rounded-full hover:bg-white/10 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full overflow-hidden bg-[#ab815a]/30 flex items-center justify-center">
+                    {userAvatar ? (
+                      <Image
+                        src={userAvatar}
+                        alt={userName || ""}
+                        width={32}
+                        height={32}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <span className="text-xs font-bold text-white">
+                        {userName?.charAt(0).toUpperCase() || "?"}
+                      </span>
+                    )}
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {userMenuOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full mt-2 w-56 rounded-lg bg-[#1e232b] border border-white/10 shadow-xl overflow-hidden"
+                    >
+                      <div className="px-4 py-3 border-b border-white/10">
+                        <p className="text-sm font-medium text-white truncate">{userName}</p>
+                        <p className="text-xs text-white/50 truncate">{session.user?.email}</p>
+                      </div>
+                      <Link
+                        href="/profile"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <User size={15} />
+                        Profile
+                      </Link>
+                      <Link
+                        href="/my-posts"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <FileText size={15} />
+                        My Posts
+                      </Link>
+                      <Link
+                        href="/write"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-white/80 hover:text-white hover:bg-white/10 transition-colors"
+                      >
+                        <PenLine size={15} />
+                        Write a Post
+                      </Link>
+                      <div className="border-t border-white/10">
+                        <button
+                          onClick={() => { setUserMenuOpen(false); signOut({ callbackUrl: "/" }); }}
+                          className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-red-400 hover:text-red-300 hover:bg-white/10 transition-colors"
+                        >
+                          <LogOut size={15} />
+                          Sign Out
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="ml-2 inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white/80 hover:text-white transition-colors rounded-md hover:bg-white/10 border border-white/20"
+              >
+                <User size={15} />
+                Sign In
+              </Link>
+            )}
           </nav>
 
           {/* Mobile Menu Button */}
@@ -249,6 +362,18 @@ export default function Header() {
                   </div>
                 ))}
 
+                {/* Mobile: Write link */}
+                {session && (
+                  <Link
+                    href="/write"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-2 px-6 py-3 text-base font-medium text-[#ab815a] hover:text-white hover:bg-white/5 transition-colors"
+                  >
+                    <PenLine size={18} />
+                    Write a Post
+                  </Link>
+                )}
+
                 {/* Mobile Give Button */}
                 <div className="mx-6 mt-4 pt-4 border-t border-white/10">
                   <a
@@ -259,6 +384,55 @@ export default function Header() {
                   >
                     Give
                   </a>
+                </div>
+
+                {/* Mobile User Section */}
+                <div className="mx-6 mt-4 pt-4 border-t border-white/10">
+                  {session ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-3 px-0 py-2">
+                        <div className="w-8 h-8 rounded-full overflow-hidden bg-[#ab815a]/30 flex items-center justify-center">
+                          {userAvatar ? (
+                            <Image src={userAvatar} alt="" width={32} height={32} className="object-cover w-full h-full" />
+                          ) : (
+                            <span className="text-xs font-bold text-white">{userName?.charAt(0).toUpperCase()}</span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-white">{userName}</p>
+                          <p className="text-xs text-white/50">{session.user?.email}</p>
+                        </div>
+                      </div>
+                      <Link
+                        href="/profile"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-2 text-sm text-white/70 hover:text-white transition-colors"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/my-posts"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block py-2 text-sm text-white/70 hover:text-white transition-colors"
+                      >
+                        My Posts
+                      </Link>
+                      <button
+                        onClick={() => { setMobileMenuOpen(false); signOut({ callbackUrl: "/" }); }}
+                        className="block py-2 text-sm text-red-400 hover:text-red-300 transition-colors"
+                      >
+                        Sign Out
+                      </button>
+                    </div>
+                  ) : (
+                    <Link
+                      href="/sign-in"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block w-full rounded-md border border-white/20 px-5 py-3 text-center text-base font-medium text-white hover:bg-white/10 transition-colors"
+                    >
+                      Sign In
+                    </Link>
+                  )}
                 </div>
               </div>
             </motion.nav>
