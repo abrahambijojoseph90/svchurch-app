@@ -661,12 +661,12 @@ export default function RegistrationForm() {
             exit="exit"
             transition={{ duration: 0.25, ease: 'easeInOut' }}
           >
-            {step === 0 && <StepDays />}
-            {step === 1 && <StepDetails />}
-            {step === 2 && <StepFamily />}
-            {step === 3 && <StepGuests />}
-            {step === 4 && <StepLogistics />}
-            {step === 5 && <StepReview />}
+            {step === 0 && StepDays()}
+            {step === 1 && StepDetails()}
+            {step === 2 && StepFamily()}
+            {step === 3 && StepGuests()}
+            {step === 4 && StepLogistics()}
+            {step === 5 && StepReview()}
           </motion.div>
         </AnimatePresence>
       </div>
