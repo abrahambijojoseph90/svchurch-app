@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 import {
   ChevronRight,
   ChevronLeft,
@@ -25,7 +26,6 @@ import {
   Car,
   MessageCircle,
   Pencil,
-  TreePine,
 } from 'lucide-react';
 
 /* ================================================================
@@ -107,7 +107,7 @@ const INITIAL_FORM_DATA: FormData = {
 const uid = () => Math.random().toString(36).slice(2, 9);
 
 const INPUT =
-  'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition-all text-base placeholder:text-gray-300';
+  'w-full px-4 py-3 rounded-xl border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-base placeholder:text-gray-300';
 const LABEL = 'block text-sm font-medium text-gray-700 mb-1';
 const CARD = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-5';
 
@@ -116,7 +116,7 @@ const CARD = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-5';
    ================================================================ */
 
 function Confetti() {
-  const colors = ['#10b981', '#f59e0b', '#3b82f6', '#ef4444', '#8b5cf6', '#ec4899'];
+  const colors = ['#ab815a', '#f16923', '#c9a882', '#8a6744', '#f4894f', '#d4bc9f'];
   return (
     <div className="fixed inset-0 pointer-events-none z-50 overflow-hidden">
       {Array.from({ length: 60 }).map((_, i) => (
@@ -377,7 +377,7 @@ export default function RegistrationForm() {
     return (
       <>
         {showConfetti && <Confetti />}
-        <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-cream to-amber-50 flex items-center justify-center px-4 py-12">
+        <div className="min-h-screen bg-gradient-to-br from-cream via-warmGray to-cream flex items-center justify-center px-4 py-12">
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -390,9 +390,9 @@ export default function RegistrationForm() {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ type: 'spring', delay: 0.2, stiffness: 200 }}
-                className="w-20 h-20 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5"
+                className="w-20 h-20 rounded-full bg-primary/15 flex items-center justify-center mx-auto mb-5"
               >
-                <Check className="w-10 h-10 text-emerald-600" strokeWidth={3} />
+                <Check className="w-10 h-10 text-primary" strokeWidth={3} />
               </motion.div>
 
               <h1 className="text-2xl font-heading font-bold text-gray-900 mb-2">
@@ -404,7 +404,7 @@ export default function RegistrationForm() {
               </p>
 
               {/* Summary */}
-              <div className="bg-emerald-50 rounded-xl p-4 text-left space-y-2 mb-6 text-sm">
+              <div className="bg-cream rounded-xl p-4 text-left space-y-2 mb-6 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Total people</span>
                   <span className="font-semibold">{totalPeople}</span>
@@ -469,33 +469,35 @@ export default function RegistrationForm() {
      ================================================================ */
 
   return (
-    <div ref={topRef} className="min-h-screen bg-gradient-to-br from-emerald-50 via-cream to-amber-50">
+    <div ref={topRef} className="min-h-screen bg-gradient-to-br from-cream via-warmGray to-cream">
       {/* -------- HERO HEADER -------- */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-emerald-800 via-emerald-700 to-teal-700 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-br from-dark via-[#2e3440] to-dark text-white">
         {/* Decorative blobs */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-emerald-400/10 blur-3xl" />
+          <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
           <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-amber-400/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-teal-300/5 blur-3xl" />
-          {/* Floating trees */}
-          <TreePine className="absolute top-8 right-8 w-12 h-12 text-white/5" />
-          <TreePine className="absolute bottom-6 left-10 w-8 h-8 text-white/5" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
         </div>
 
-        <div className="relative max-w-lg mx-auto px-5 pt-10 pb-8 text-center">
+        <div className="relative max-w-lg mx-auto px-5 pt-8 pb-8 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/15 backdrop-blur-sm rounded-full text-sm mb-4">
-              <span className="font-accent tracking-wide">Spring Valley Church</span>
-            </div>
+            <Image
+              src="/images/logo-white.png"
+              alt="Spring Valley Church"
+              width={180}
+              height={180}
+              className="mx-auto mb-4"
+              priority
+            />
 
             <h1 className="text-3xl sm:text-4xl font-heading font-bold mb-2 leading-tight">
               Church Retreat 2026
             </h1>
 
-            <p className="text-emerald-100 text-base sm:text-lg mb-1">
+            <p className="text-[#e8d5c4] text-base sm:text-lg mb-1">
               Thursday 28 – Sunday 31 May
             </p>
-            <p className="text-emerald-200/80 text-sm flex items-center justify-center gap-1">
+            <p className="text-[#d4bc9f]/80 text-sm flex items-center justify-center gap-1">
               <MapPin className="w-3.5 h-3.5" />
               Great Wenham, Colchester CO7 6FJ
             </p>
@@ -531,9 +533,9 @@ export default function RegistrationForm() {
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
                       i < step
-                        ? 'bg-emerald-500 text-white'
+                        ? 'bg-primary text-white'
                         : i === step
-                          ? 'bg-emerald-600 text-white ring-4 ring-emerald-100'
+                          ? 'bg-primary text-white ring-4 ring-primary/20'
                           : 'bg-gray-100 text-gray-400'
                     }`}
                   >
@@ -541,7 +543,7 @@ export default function RegistrationForm() {
                   </div>
                   <span
                     className={`text-[10px] font-medium transition-colors ${
-                      i <= step ? 'text-emerald-700' : 'text-gray-400'
+                      i <= step ? 'text-[#8a6744]' : 'text-gray-400'
                     }`}
                   >
                     {s.title}
@@ -552,7 +554,7 @@ export default function RegistrationForm() {
           </div>
           <div className="h-1 bg-gray-100 rounded-full overflow-hidden">
             <motion.div
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
+              className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
               animate={{ width: `${(step / (STEPS.length - 1)) * 100}%` }}
               transition={{ duration: 0.4, ease: 'easeInOut' }}
             />
@@ -604,7 +606,7 @@ export default function RegistrationForm() {
           {step < STEPS.length - 1 ? (
             <button
               onClick={goNext}
-              className="flex items-center gap-1 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all shadow-md shadow-emerald-200"
+              className="flex items-center gap-1 px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-[#8a6744] active:scale-95 transition-all shadow-md shadow-primary/20"
             >
               Next
               <ChevronRight className="w-4 h-4" />
@@ -613,7 +615,7 @@ export default function RegistrationForm() {
             <button
               onClick={handleSubmit}
               disabled={submitting}
-              className="flex items-center gap-2 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 active:scale-95 transition-all shadow-md shadow-emerald-200 disabled:opacity-60 disabled:pointer-events-none"
+              className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl text-sm font-medium hover:bg-[#8a6744] active:scale-95 transition-all shadow-md shadow-primary/20 disabled:opacity-60 disabled:pointer-events-none"
             >
               {submitting ? (
                 <>
@@ -668,12 +670,12 @@ export default function RegistrationForm() {
                 onClick={() => toggleDay(d.id)}
                 className={`relative p-4 rounded-xl border-2 text-left transition-all ${
                   selected
-                    ? 'border-emerald-500 bg-emerald-50 shadow-sm shadow-emerald-100'
+                    ? 'border-primary bg-cream shadow-sm shadow-primary/10'
                     : 'border-gray-200 bg-white hover:border-gray-300'
                 }`}
               >
                 {selected && (
-                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-emerald-500 flex items-center justify-center">
+                  <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center">
                     <Check className="w-3 h-3 text-white" strokeWidth={3} />
                   </div>
                 )}
@@ -694,7 +696,7 @@ export default function RegistrationForm() {
             animate={{ opacity: 1, y: 0 }}
             type="button"
             onClick={selectAllDays}
-            className="w-full py-2.5 text-sm text-emerald-600 font-medium rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 transition-all"
+            className="w-full py-2.5 text-sm text-primary font-medium rounded-xl border border-primary/20 bg-cream/50 hover:bg-cream transition-all"
           >
             Select all four days (recommended)
           </motion.button>
@@ -830,7 +832,7 @@ export default function RegistrationForm() {
             >
               <div className={`${CARD} space-y-3 relative`}>
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-emerald-700">
+                  <span className="text-sm font-semibold text-[#8a6744]">
                     Member {i + 1}
                   </span>
                   <button
@@ -908,7 +910,7 @@ export default function RegistrationForm() {
           type="button"
           whileTap={{ scale: 0.97 }}
           onClick={addFamilyMember}
-          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-emerald-300 text-emerald-600 text-sm font-medium hover:bg-emerald-50 hover:border-emerald-400 transition-all"
+          className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-primary/40 text-primary text-sm font-medium hover:bg-cream hover:border-primary transition-all"
         >
           <Plus className="w-4 h-4" />
           Add Family Member
@@ -952,7 +954,7 @@ export default function RegistrationForm() {
               }}
               className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all ${
                 formData.bringingGuests === opt.val
-                  ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                  ? 'border-primary bg-cream text-[#8a6744]'
                   : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
               }`}
             >
@@ -974,7 +976,7 @@ export default function RegistrationForm() {
               >
                 <div className={`${CARD} space-y-3`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-emerald-700">Guest {i + 1}</span>
+                    <span className="text-sm font-semibold text-[#8a6744]">Guest {i + 1}</span>
                     <button
                       type="button"
                       onClick={() => removeGuest(guest.id)}
@@ -1018,7 +1020,7 @@ export default function RegistrationForm() {
               type="button"
               whileTap={{ scale: 0.97 }}
               onClick={addGuest}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-emerald-300 text-emerald-600 text-sm font-medium hover:bg-emerald-50 hover:border-emerald-400 transition-all"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-dashed border-primary/40 text-primary text-sm font-medium hover:bg-cream hover:border-primary transition-all"
             >
               <Plus className="w-4 h-4" />
               Add Another Guest
@@ -1046,8 +1048,8 @@ export default function RegistrationForm() {
         {/* Transport */}
         <div className={CARD}>
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center">
-              <Car className="w-4 h-4 text-blue-600" />
+            <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+              <Car className="w-4 h-4 text-primary" />
             </div>
             <div>
               <p className="font-semibold text-gray-900 text-sm">Do you need transportation?</p>
@@ -1066,7 +1068,7 @@ export default function RegistrationForm() {
                 onClick={() => updateField('needTransport', opt.val)}
                 className={`flex-1 py-2.5 rounded-xl border-2 text-sm font-medium transition-all ${
                   formData.needTransport === opt.val
-                    ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                    ? 'border-primary bg-cream text-[#8a6744]'
                     : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
                 }`}
               >
@@ -1248,7 +1250,7 @@ export default function RegistrationForm() {
               return (
                 <span
                   key={d}
-                  className="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-sm font-medium"
+                  className="px-3 py-1 bg-cream text-[#8a6744] rounded-full text-sm font-medium"
                 >
                   {info?.day} {info?.date}
                 </span>
@@ -1290,7 +1292,7 @@ export default function RegistrationForm() {
             <div className="space-y-2">
               {formData.familyMembers.map((m) => (
                 <div key={m.id} className="text-sm flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold">
                     {m.fullName.charAt(0).toUpperCase()}
                   </span>
                   <span className="font-medium">{m.fullName}</span>
@@ -1320,7 +1322,7 @@ export default function RegistrationForm() {
             <div className="space-y-2">
               {formData.guests.map((g) => (
                 <div key={g.id} className="text-sm flex items-center gap-2">
-                  <span className="w-6 h-6 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs font-bold">
+                  <span className="w-6 h-6 rounded-full bg-primary/15 text-primary flex items-center justify-center text-xs font-bold">
                     {g.fullName.charAt(0).toUpperCase()}
                   </span>
                   <span className="font-medium">{g.fullName}</span>
@@ -1371,10 +1373,10 @@ export default function RegistrationForm() {
         </ReviewSection>
 
         {/* Total */}
-        <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
-          <p className="text-sm text-emerald-600 mb-1">Total people attending</p>
-          <p className="text-3xl font-heading font-bold text-emerald-800">{totalPeople}</p>
-          <p className="text-xs text-emerald-500 mt-1">
+        <div className="bg-cream border border-primary/20 rounded-2xl p-4 text-center">
+          <p className="text-sm text-primary mb-1">Total people attending</p>
+          <p className="text-3xl font-heading font-bold text-dark">{totalPeople}</p>
+          <p className="text-xs text-primary mt-1">
             (You{formData.familyMembers.length > 0 ? ` + ${formData.familyMembers.length} family` : ''}
             {formData.guests.length > 0 ? ` + ${formData.guests.length} guest${formData.guests.length > 1 ? 's' : ''}` : ''})
           </p>
@@ -1388,7 +1390,7 @@ export default function RegistrationForm() {
           </p>
           <a
             href="tel:+447378143331"
-            className="text-emerald-600 font-medium hover:underline"
+            className="text-primary font-medium hover:underline"
           >
             +44 7378 143331
           </a>
@@ -1425,7 +1427,7 @@ function ReviewSection({
         <button
           type="button"
           onClick={onEdit}
-          className="flex items-center gap-1 text-xs text-emerald-600 font-medium hover:text-emerald-700 transition-colors"
+          className="flex items-center gap-1 text-xs text-primary font-medium hover:text-[#8a6744] transition-colors"
         >
           <Pencil className="w-3 h-3" />
           Edit
