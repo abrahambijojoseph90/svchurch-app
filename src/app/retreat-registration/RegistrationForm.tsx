@@ -471,35 +471,35 @@ export default function RegistrationForm() {
   return (
     <div ref={topRef} className="min-h-screen bg-gradient-to-br from-cream via-warmGray to-cream">
       {/* -------- HERO HEADER -------- */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-dark via-[#2e3440] to-dark text-white">
-        {/* Decorative blobs */}
+      <div className="relative overflow-hidden bg-dark text-white">
+        {/* Warm accent glow */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
-          <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -bottom-10 -right-10 w-48 h-48 rounded-full bg-amber-400/10 blur-3xl" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-40 rounded-full bg-accent/15 blur-3xl" />
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
         </div>
 
-        <div className="relative max-w-lg mx-auto px-5 pt-8 pb-8 text-center">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+        <div className="relative max-w-lg mx-auto px-5 pt-5 pb-5 text-center">
+          <motion.div initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            {/* Logo — compact */}
             <Image
-              src="/images/logo-white.png"
+              src="/images/retreat-logo-white.png"
               alt="Spring Valley Church"
-              width={180}
-              height={180}
-              className="mx-auto mb-4"
+              width={100}
+              height={100}
+              className="mx-auto mb-2"
               priority
             />
 
-            <h1 className="text-3xl sm:text-4xl font-heading font-bold mb-2 leading-tight">
-              Church Retreat 2026
+            {/* Title — bold and visible */}
+            <h1 className="text-2xl sm:text-3xl font-heading font-bold text-white mb-1.5 leading-tight">
+              Church Retreat <span className="text-accent">2026</span>
             </h1>
 
-            <p className="text-[#e8d5c4] text-base sm:text-lg mb-1">
-              Thursday 28 – Sunday 31 May
-            </p>
-            <p className="text-[#d4bc9f]/80 text-sm flex items-center justify-center gap-1">
-              <MapPin className="w-3.5 h-3.5" />
-              Great Wenham, Colchester CO7 6FJ
+            {/* Date & location in one compact line */}
+            <p className="text-white/80 text-sm sm:text-base">
+              Thu 28 – Sun 31 May
+              <span className="mx-2 text-primary">|</span>
+              <MapPin className="w-3 h-3 inline -mt-0.5" /> Colchester CO7 6FJ
             </p>
 
             {daysUntil > 0 && (
@@ -507,10 +507,10 @@ export default function RegistrationForm() {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 mt-4 bg-amber-500/20 border border-amber-400/30 rounded-full text-amber-100 text-sm"
+                className="inline-flex items-center gap-1.5 px-3 py-1 mt-3 bg-accent/20 border border-accent/30 rounded-full text-accent text-xs font-medium"
               >
-                <Sparkles className="w-4 h-4" />
-                <span className="font-medium">{daysUntil} days to go!</span>
+                <Sparkles className="w-3 h-3" />
+                {daysUntil} days to go!
               </motion.div>
             )}
           </motion.div>
@@ -563,7 +563,7 @@ export default function RegistrationForm() {
       </div>
 
       {/* -------- FORM CONTENT -------- */}
-      <div className="max-w-lg mx-auto px-4 py-6 pb-36">
+      <div className="max-w-lg mx-auto px-4 py-4 pb-32">
         <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={step}
