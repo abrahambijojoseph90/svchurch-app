@@ -111,6 +111,91 @@ const INPUT =
 const LABEL = 'block text-sm font-medium text-gray-700 mb-1';
 const CARD = 'bg-white rounded-2xl border border-gray-100 shadow-sm p-5';
 
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November', 'December',
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+
+/* ================================================================
+   DOB PICKER — three dropdowns (Day, Month, Year)
+   ================================================================ */
+
+function DobPicker({
+  value,
+  onChange,
+  error,
+}: {
+  value: string;
+  onChange: (val: string) => void;
+  error?: string;
+}) {
+  // Parse existing value (YYYY-MM-DD)
+  const parts = value ? value.split('-') : ['', '', ''];
+  const year = parts[0] || '';
+  const month = parts[1] || '';
+  const day = parts[2] || '';
+
+  const update = (d: string, m: string, y: string) => {
+    if (d && m && y) {
+      onChange(`${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`);
+    } else {
+      // Keep partial state so selects show chosen values
+      onChange(d || m || y ? `${y || '0000'}-${(m || '00').padStart(2, '0')}-${(d || '00').padStart(2, '0')}` : '');
+    }
+  };
+
+  const selectClass =
+    'flex-1 px-2 py-3 rounded-xl border border-gray-200 bg-white focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm text-center appearance-none';
+
+  return (
+    <div>
+      <div className="flex gap-2">
+        {/* Day */}
+        <select
+          className={selectClass}
+          value={day}
+          onChange={(e) => update(e.target.value, month, year)}
+        >
+          <option value="">Day</option>
+          {Array.from({ length: 31 }, (_, i) => {
+            const d = String(i + 1).padStart(2, '0');
+            return <option key={d} value={d}>{i + 1}</option>;
+          })}
+        </select>
+
+        {/* Month */}
+        <select
+          className={`${selectClass} flex-[1.4]`}
+          value={month}
+          onChange={(e) => update(day, e.target.value, year)}
+        >
+          <option value="">Month</option>
+          {MONTHS.map((m, i) => {
+            const val = String(i + 1).padStart(2, '0');
+            return <option key={val} value={val}>{m}</option>;
+          })}
+        </select>
+
+        {/* Year */}
+        <select
+          className={selectClass}
+          value={year}
+          onChange={(e) => update(day, month, e.target.value)}
+        >
+          <option value="">Year</option>
+          {Array.from({ length: CURRENT_YEAR - 1919 }, (_, i) => {
+            const y = String(CURRENT_YEAR - i);
+            return <option key={y} value={y}>{y}</option>;
+          })}
+        </select>
+      </div>
+      <FieldError message={error} />
+    </div>
+  );
+}
+
 /* ================================================================
    CONFETTI
    ================================================================ */
@@ -285,7 +370,8 @@ export default function RegistrationForm() {
         break;
       case 1:
         if (!formData.fullName.trim()) e.fullName = 'Full name is required';
-        if (!formData.dob) e.dob = 'Date of birth is required';
+        if (!formData.dob || formData.dob.includes('0000') || formData.dob.includes('-00'))
+          e.dob = 'Please select day, month, and year';
         if (!formData.phone.trim()) e.phone = 'Phone number is required';
         if (!formData.email.trim()) e.email = 'Email is required';
         else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) e.email = 'Enter a valid email';
@@ -294,7 +380,8 @@ export default function RegistrationForm() {
       case 2:
         formData.familyMembers.forEach((m, i) => {
           if (!m.fullName.trim()) e[`family_${i}_name`] = 'Name is required';
-          if (!m.dob) e[`family_${i}_dob`] = 'Date of birth is required';
+          if (!m.dob || m.dob.includes('0000') || m.dob.includes('-00'))
+            e[`family_${i}_dob`] = 'Please select day, month, and year';
         });
         break;
       case 3:
@@ -748,16 +835,11 @@ export default function RegistrationForm() {
             <label className={LABEL}>
               Date of Birth <span className="text-red-400">*</span>
             </label>
-            <input
-              type="date"
-              className={INPUT}
+            <DobPicker
               value={formData.dob}
-              min="1920-01-01"
-              max={new Date().toISOString().split('T')[0]}
-              onChange={(e) => updateField('dob', e.target.value)}
+              onChange={(val) => updateField('dob', val)}
+              error={errors.dob}
             />
-            <p className="text-xs text-gray-400 mt-1">Click the calendar icon to pick your date</p>
-            <FieldError message={errors.dob} />
           </div>
 
           {/* Email */}
@@ -862,38 +944,33 @@ export default function RegistrationForm() {
                   <FieldError message={errors[`family_${i}_name`]} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className={LABEL}>
-                      Date of Birth <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      className={INPUT}
-                      value={member.dob}
-                      min="1920-01-01"
-                      max={new Date().toISOString().split('T')[0]}
-                      onChange={(e) => updateFamilyMember(member.id, 'dob', e.target.value)}
-                    />
-                    <FieldError message={errors[`family_${i}_dob`]} />
-                  </div>
-                  <div>
-                    <label className={LABEL}>Relationship</label>
-                    <select
-                      className={INPUT}
-                      value={member.relationship}
-                      onChange={(e) =>
-                        updateFamilyMember(member.id, 'relationship', e.target.value)
-                      }
-                    >
-                      <option value="spouse">Spouse</option>
-                      <option value="son">Son</option>
-                      <option value="daughter">Daughter</option>
-                      <option value="sibling">Sibling</option>
-                      <option value="parent">Parent</option>
-                      <option value="other">Other</option>
-                    </select>
-                  </div>
+                <div>
+                  <label className={LABEL}>
+                    Date of Birth <span className="text-red-400">*</span>
+                  </label>
+                  <DobPicker
+                    value={member.dob}
+                    onChange={(val) => updateFamilyMember(member.id, 'dob', val)}
+                    error={errors[`family_${i}_dob`]}
+                  />
+                </div>
+
+                <div>
+                  <label className={LABEL}>Relationship</label>
+                  <select
+                    className={INPUT}
+                    value={member.relationship}
+                    onChange={(e) =>
+                      updateFamilyMember(member.id, 'relationship', e.target.value)
+                    }
+                  >
+                    <option value="spouse">Spouse</option>
+                    <option value="son">Son</option>
+                    <option value="daughter">Daughter</option>
+                    <option value="sibling">Sibling</option>
+                    <option value="parent">Parent</option>
+                    <option value="other">Other</option>
+                  </select>
                 </div>
 
                 <div>
