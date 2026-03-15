@@ -752,8 +752,11 @@ export default function RegistrationForm() {
               type="date"
               className={INPUT}
               value={formData.dob}
+              min="1920-01-01"
+              max={new Date().toISOString().split('T')[0]}
               onChange={(e) => updateField('dob', e.target.value)}
             />
+            <p className="text-xs text-gray-400 mt-1">Click the calendar icon to pick your date</p>
             <FieldError message={errors.dob} />
           </div>
 
@@ -868,6 +871,8 @@ export default function RegistrationForm() {
                       type="date"
                       className={INPUT}
                       value={member.dob}
+                      min="1920-01-01"
+                      max={new Date().toISOString().split('T')[0]}
                       onChange={(e) => updateFamilyMember(member.id, 'dob', e.target.value)}
                     />
                     <FieldError message={errors[`family_${i}_dob`]} />
